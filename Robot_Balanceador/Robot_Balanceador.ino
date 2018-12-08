@@ -1,3 +1,7 @@
+#include "I2Cdev.h"
+#include "MPU6050.h"
+#include "Wire.h"
+
 char estado = '0';  //variable que recibe las instrucciones del celular
 
 int ENA = 6; // MCU PWM Pin 10 to ENA on L298n Board
@@ -7,8 +11,34 @@ int IN3 = 9;  // MCU Digital pin 7 to IN3 on L298n Board
 int IN4 = 10;  // MCU Digital pin 6 to IN4 on L298n Board
 int ENB = 11;  // MCU PWM Pin 5 to ENB on L298n Board
 
-
+const int mpuAddress = 0x68;  // Puede ser 0x68 o 0x69
+MPU6050 mpu(mpuAddress);
  
+int ax, ay, az;
+int gx, gy, gz;
+ 
+long tiempo_prev;
+float dt;
+float ang_x, ang_y;
+float ang_x_prev, ang_y_prev;
+
+void updateFiltered()
+{
+   dt = (millis() - tiempo_prev) / 1000.0;
+   tiempo_prev = millis();
+ 
+   //Calcular los ángulos con acelerometro
+   float accel_ang_x = atan(ay / sqrt(pow(ax, 2) + pow(az, 2)))*(180.0 / 3.14);
+   float accel_ang_y = atan(-ax / sqrt(pow(ay, 2) + pow(az, 2)))*(180.0 / 3.14);
+ 
+   //Calcular angulo de rotación con giroscopio y filtro complementario
+   ang_x = 0.98*(ang_x_prev + (gx / 131)*dt) + 0.02*accel_ang_x;
+   ang_y = 0.98*(ang_y_prev + (gy / 131)*dt) + 0.02*accel_ang_y;
+ 
+   ang_x_prev = ang_x;
+   ang_y_prev = ang_y;
+}
+
 void setup() 
 {
   Serial.begin(9600);    
@@ -18,8 +48,17 @@ void setup()
   pinMode(IN2, OUTPUT);
   pinMode(IN3, OUTPUT);
   pinMode(IN4, OUTPUT);
-}
 
+  Wire.begin();
+  mpu.initialize();
+}
+int angulox()
+{
+  mpu.getAcceleration(&ax, &ay, &az);
+  mpu.getRotation(&gx, &gy, &gz);
+  updateFiltered();
+  return ang_x;
+}
 void loop() {
   estado='x'; // Resetear variable
   if(Serial.available()>0){  // Entrar solo cuando se envíe algo
