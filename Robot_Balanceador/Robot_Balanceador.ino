@@ -59,8 +59,67 @@ void loop() {
       default: halt();     
     }//Fin switch  
   }
-  delay(10); 
-  estabilizar();
+
+  //------------------------------------------ Estabilizar ---------------------------
+
+  int potencia;  
+  int angulo_actual;
+
+
+    angulo_actual = angulox();
+
+  Serial.print(F("Rotacion en X:  "));
+  Serial.print(angulo_actual); 
+
+  int ganancia = ang_x * 100 / 45;
+  
+  if(angulo_actual<-1 ){
+    potencia = (-1)*55*angulo_actual/45;
+    potencia+=200;
+    if(potencia>255){
+      potencia=255;
+    }
+    Serial.print(F("\t potencia: "));
+    Serial.println(potencia);
+    
+    analogWrite(ENA, potencia); 
+    analogWrite(ENB, potencia); 
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, HIGH);
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, HIGH);
+    delay(100);
+  }
+  else if(angulo_actual>1 ){
+    potencia = 55*angulo_actual/45;
+    potencia+=200;
+    if(potencia>255){
+      potencia=255;
+    }
+    Serial.print(F("\t potencia: "));
+    Serial.println(potencia);
+    
+    analogWrite(ENA, potencia); 
+    analogWrite(ENB, potencia);
+    digitalWrite(IN1, HIGH); 
+    digitalWrite(IN2, LOW);  
+    digitalWrite(IN3, HIGH); 
+    digitalWrite(IN4, LOW);
+    delay(100);
+  }   
+  else{
+    potencia = 0;
+    analogWrite(ENA, potencia); 
+    analogWrite(ENB, potencia);
+    Serial.print(F("\t potencia: "));
+    Serial.println(potencia);
+    
+    digitalWrite(IN1, LOW); // Apagar Motor
+    digitalWrite(IN2, LOW); // Apagar Motor
+    digitalWrite(IN3, LOW); // Apagar Motor
+    digitalWrite(IN4, LOW); // Apagar Motor
+    delay(100);
+  }   
 }
 
 
@@ -112,48 +171,6 @@ void halt(){
   digitalWrite(IN4, LOW); // Apagar Motor 
 }
 
-//------------------------------------------ Estabilizar ---------------------------
-
-void estabilizar(){ 
-  analogWrite(ENA, 255); 
-  analogWrite(ENB, 255);  
-  
-  if(angulox()<-15 ){
-    digitalWrite(IN1, LOW);
-    digitalWrite(IN2, HIGH);
-    digitalWrite(IN3, LOW);
-    digitalWrite(IN4, HIGH);
-  }
-  else if(angulox()>15 ){
-    digitalWrite(IN1, HIGH); 
-    digitalWrite(IN2, LOW);  
-    digitalWrite(IN3, HIGH); 
-    digitalWrite(IN4, LOW);
-  }   
-  else if(angulox()<-1 ){
-    analogWrite(ENA, 200); 
-    analogWrite(ENB, 200); 
-    digitalWrite(IN1, LOW); 
-    digitalWrite(IN2, HIGH);  
-    digitalWrite(IN3, LOW);
-    digitalWrite(IN4, HIGH);
-  }
-  else if(angulox()>1 ){
-    analogWrite(ENA, 200); 
-    analogWrite(ENB, 200);
-    digitalWrite(IN1, HIGH); 
-    digitalWrite(IN2, LOW);  
-    digitalWrite(IN3, HIGH); 
-    digitalWrite(IN4, LOW);
-  } 
-  else{
-    digitalWrite(IN1, LOW); // Apagar Motor
-    digitalWrite(IN2, LOW); // Apagar Motor
-    digitalWrite(IN3, LOW); // Apagar Motor
-    digitalWrite(IN4, LOW); // Apagar Motor
-  }    
-
-}
 
 //------------------------------------------ Sensor Inercial ---------------------------
 
@@ -163,12 +180,8 @@ int angulox()
   mpu.getRotation(&gx, &gy, &gz);
   updateFiltered();  
   delay(10);  
-  // Mostrar resultados
-   Serial.print(F("Rotacion en X:  "));
-   Serial.print(ang_x);
-   Serial.print(F("\t Rotacion en Y: "));
-   Serial.println(ang_y);
-  return ang_x;
+  // Mostrar resultados     
+   return ang_x;
 }
 
 void updateFiltered()
