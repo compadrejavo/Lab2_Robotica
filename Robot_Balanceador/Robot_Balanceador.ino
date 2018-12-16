@@ -114,16 +114,33 @@ void halt(){
 
 //------------------------------------------ Estabilizar ---------------------------
 
-void estabilizar(){   
-  analogWrite(ENA, 250); 
-  analogWrite(ENB, 250);
-  if(angulox()<3 ){
+void estabilizar(){ 
+  analogWrite(ENA, 255); 
+  analogWrite(ENB, 255);  
+  
+  if(angulox()<-15 ){
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, HIGH);
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, HIGH);
+  }
+  else if(angulox()>15 ){
+    digitalWrite(IN1, HIGH); 
+    digitalWrite(IN2, LOW);  
+    digitalWrite(IN3, HIGH); 
+    digitalWrite(IN4, LOW);
+  }   
+  else if(angulox()<-1 ){
+    analogWrite(ENA, 200); 
+    analogWrite(ENB, 200); 
     digitalWrite(IN1, LOW); 
     digitalWrite(IN2, HIGH);  
     digitalWrite(IN3, LOW);
     digitalWrite(IN4, HIGH);
   }
-  else if(angulox()>3 ){
+  else if(angulox()>1 ){
+    analogWrite(ENA, 200); 
+    analogWrite(ENB, 200);
     digitalWrite(IN1, HIGH); 
     digitalWrite(IN2, LOW);  
     digitalWrite(IN3, HIGH); 
@@ -135,6 +152,7 @@ void estabilizar(){
     digitalWrite(IN3, LOW); // Apagar Motor
     digitalWrite(IN4, LOW); // Apagar Motor
   }    
+
 }
 
 //------------------------------------------ Sensor Inercial ---------------------------
