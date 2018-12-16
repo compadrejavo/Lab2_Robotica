@@ -66,15 +66,15 @@ void loop() {
   int angulo_actual;
 
 
-    angulo_actual = angulox();
+  angulo_actual = angulox();
 
   Serial.print(F("Rotacion en X:  "));
   Serial.print(angulo_actual); 
 
   int ganancia = ang_x * 100 / 45;
   
-  if(angulo_actual<-1 ){
-    potencia = (-1)*55*angulo_actual/45;
+  if(angulo_actual<0 ){
+    potencia = (-1)*55*ganancia/100;
     potencia+=200;
     if(potencia>255){
       potencia=255;
@@ -88,10 +88,10 @@ void loop() {
     digitalWrite(IN2, HIGH);
     digitalWrite(IN3, LOW);
     digitalWrite(IN4, HIGH);
-    delay(100);
+    delay(50);
   }
-  else if(angulo_actual>1 ){
-    potencia = 55*angulo_actual/45;
+  else if(angulo_actual>0 ){
+    potencia = 55*ganancia/100;
     potencia+=200;
     if(potencia>255){
       potencia=255;
@@ -105,7 +105,7 @@ void loop() {
     digitalWrite(IN2, LOW);  
     digitalWrite(IN3, HIGH); 
     digitalWrite(IN4, LOW);
-    delay(100);
+    delay(50);
   }   
   else{
     potencia = 0;
@@ -118,7 +118,7 @@ void loop() {
     digitalWrite(IN2, LOW); // Apagar Motor
     digitalWrite(IN3, LOW); // Apagar Motor
     digitalWrite(IN4, LOW); // Apagar Motor
-    delay(100);
+    delay(50);
   }   
 }
 
@@ -181,7 +181,7 @@ int angulox()
   updateFiltered();  
   delay(10);  
   // Mostrar resultados     
-   return ang_x;
+   return ang_x-2.5;
 }
 
 void updateFiltered()
