@@ -25,6 +25,7 @@ MPU6050 mpu(mpuAddress);
  
 int ax, ay, az;
 int gx, gy, gz;
+int error;
  
 long tiempo_prev;
 float dt;
@@ -64,14 +65,16 @@ void loop() {
 
   int potencia;  
   int angulo_actual;
-
+  int freq = 10;
+  int angulo_limite = 30;
+  error = -6;
 
   angulo_actual = angulox();
 
   Serial.print(F("Rotacion en X:  "));
   Serial.print(angulo_actual); 
 
-  int ganancia = ang_x * 100 / 45;
+  int ganancia = ang_x * 100 / angulo_limite;
   
   if(angulo_actual<0 ){
     potencia = (-1)*55*ganancia/100;
@@ -88,7 +91,7 @@ void loop() {
     digitalWrite(IN2, HIGH);
     digitalWrite(IN3, LOW);
     digitalWrite(IN4, HIGH);
-    delay(50);
+    delay(freq);
   }
   else if(angulo_actual>0 ){
     potencia = 55*ganancia/100;
@@ -105,7 +108,7 @@ void loop() {
     digitalWrite(IN2, LOW);  
     digitalWrite(IN3, HIGH); 
     digitalWrite(IN4, LOW);
-    delay(50);
+    delay(freq);
   }   
   else{
     potencia = 0;
@@ -118,7 +121,7 @@ void loop() {
     digitalWrite(IN2, LOW); // Apagar Motor
     digitalWrite(IN3, LOW); // Apagar Motor
     digitalWrite(IN4, LOW); // Apagar Motor
-    delay(50);
+    delay(freq);
   }   
 }
 
@@ -181,7 +184,7 @@ int angulox()
   updateFiltered();  
   delay(10);  
   // Mostrar resultados     
-   return ang_x-2.5;
+   return ang_x+error;
 }
 
 void updateFiltered()
