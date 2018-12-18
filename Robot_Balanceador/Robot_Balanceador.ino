@@ -6,13 +6,12 @@
 char estado = '0';  //variable que recibe las instrucciones del celular
 
 //Pines puente H
-int ENA = 10; // MCU PWM Pin 10 to ENA on L298n Board
-int IN1 = 9;  // MCU Digital Pin 9 to IN1 on L298n Board 
-int IN2 = 8;  // MCU Digital Pin 8 to IN2 on L298n Board
- 
-int ENB = 5;  // MCU PWM Pin 5 to ENB on L298n Board
-int IN3 = 7;  // MCU Digital pin 7 to IN3 on L298n Board
-int IN4 = 6;  // MCU Digital pin 6 to IN4 on L298n Board
+int ENA = 5;
+int IN1 = 6;
+int IN2 = 7;
+int IN3 = 8;
+int IN4 = 9;
+int ENB = 10;
 
 //Pines giroscopo
 //GND - GND
@@ -25,7 +24,13 @@ MPU6050 mpu(mpuAddress);
  
 int ax, ay, az;
 int gx, gy, gz;
-int error;
+
+
+int angulo_actual;
+int angulo_limite = 30;
+int freq = 10;
+int error = -4;
+int potencia;
  
 long tiempo_prev;
 float dt;
@@ -56,23 +61,31 @@ void loop() {
       case 'b':  backward();   break;
       case 'l':  left();     break;
       case 'r':  right();    break;
-      case 'h':  halt();    break;   
+      case 'h':  halt();    break;  
+      case '7':  angulo_limite++;     break; 
+      case '9':  angulo_limite--;     break; 
+      case '4':  error++;     break; 
+      case '6':  error--;     break; 
+      case '1':  freq++;     break; 
+      case '3':  freq--;     break; 
       default: halt();     
     }//Fin switch  
   }
+  
+  Serial.print(angulo_limite);      
+  Serial.print("|");
+  Serial.print(error);         
+  Serial.print("|");
+  Serial.print(freq);
+  
 
   //------------------------------------------ Estabilizar ---------------------------
 
-  int potencia;  
-  int angulo_actual;
-  int freq = 10;
-  int angulo_limite = 30;
-  error = -6;
-
+      
   angulo_actual = angulox();
 
-  Serial.print(F("Rotacion en X:  "));
-  Serial.print(angulo_actual); 
+  //Serial.print(F("Rotacion en X:  "));
+  //Serial.print(angulo_actual); 
 
   int ganancia = ang_x * 100 / angulo_limite;
   
@@ -82,8 +95,8 @@ void loop() {
     if(potencia>255){
       potencia=255;
     }
-    Serial.print(F("\t potencia: "));
-    Serial.println(potencia);
+    //Serial.print(F("\t potencia: "));
+    //Serial.println(potencia);
     
     analogWrite(ENA, potencia); 
     analogWrite(ENB, potencia); 
@@ -99,8 +112,8 @@ void loop() {
     if(potencia>255){
       potencia=255;
     }
-    Serial.print(F("\t potencia: "));
-    Serial.println(potencia);
+    //Serial.print(F("\t potencia: "));
+    //Serial.println(potencia);
     
     analogWrite(ENA, potencia); 
     analogWrite(ENB, potencia);
@@ -114,8 +127,8 @@ void loop() {
     potencia = 0;
     analogWrite(ENA, potencia); 
     analogWrite(ENB, potencia);
-    Serial.print(F("\t potencia: "));
-    Serial.println(potencia);
+    //Serial.print(F("\t potencia: "));
+    //Serial.println(potencia);
     
     digitalWrite(IN1, LOW); // Apagar Motor
     digitalWrite(IN2, LOW); // Apagar Motor
@@ -134,7 +147,7 @@ void forward(){
   digitalWrite(IN4, LOW);  
   analogWrite(ENA, 200); 
   analogWrite(ENB, 200);
-  delay(200); 
+  delay(2000); 
 }
 
 void right(){  
@@ -144,7 +157,7 @@ void right(){
   digitalWrite(IN4, HIGH);  
   analogWrite(ENA, 200); 
   analogWrite(ENB, 200);
-  delay(200);
+  delay(2000);
 }
 
 void backward(){   
@@ -154,7 +167,7 @@ void backward(){
   digitalWrite(IN4, HIGH); 
   analogWrite(ENA, 200); 
   analogWrite(ENB, 200);
-  delay(200); 
+  delay(2000); 
 }
 
 void left (){ 
@@ -164,7 +177,7 @@ void left (){
   digitalWrite(IN4, LOW);  
   analogWrite(ENA, 200); 
   analogWrite(ENB, 200);
-  delay(200);
+  delay(2000);
 }
 
 void halt(){ 
@@ -172,6 +185,7 @@ void halt(){
   digitalWrite(IN2, LOW); // Apagar Motor
   digitalWrite(IN3, LOW); // Apagar Motor
   digitalWrite(IN4, LOW); // Apagar Motor 
+  delay(2000);
 }
 
 
